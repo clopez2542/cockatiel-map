@@ -10,22 +10,46 @@
       padding: 0;
     }
     #title {
-      position: absolute;
-      top: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-family: Arial;
-      font-size: 16px;
-      font-weight: bold;
-      z-index: 999;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    }
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-family: Arial;
+  font-size: 20px;
+  font-weight: bold;
+  z-index: 999;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  white-space: nowrap;
+}
+    @media (max-width: 600px) {
+  #title {
+    font-size: 12px;
+    padding: 6px 12px;
+    top: 8px;
+  }
+  #title img {
+    height: 18px;
+  }
+}
+.esri-popup__content {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.esri-popup__main-container {
+  max-height: none !important;
+}
+
+.esri-feature__main-container {
+  overflow: visible !important;
+}
   </style>
   <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
   <script src="https://js.arcgis.com/4.29/"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
@@ -86,11 +110,12 @@
                   content: function(feature) {
                     const a = feature.graphic.attributes;
                     const img = a.imageUrl
-                      ? `<a href="${a.imageUrl}" target="_blank">
-                           <img src="${a.imageUrl}" 
-                             style="width:100%; max-width:800px; margin-bottom:8px; border-radius:4px; cursor:zoom-in;">
-                         </a><br>`
-                      : "";
+  ? `<a href="${a.imageUrl}" target="_blank">
+       <img src="${a.imageUrl}" 
+         style="width:100%; max-width:800px; margin-bottom:4px; border-radius:4px; cursor:zoom-in;">
+     </a>
+     <div style="font-size:11px; color:#888; margin-bottom:8px;">🔍 Click photo to enlarge</div><br>`
+  : "";
                     return `${img}📅 Date: ${a.date}<br>📍 Location: ${a.location}<br>👤 Recorded by: ${a.recorder}`;
                   }
                 }
