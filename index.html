@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Wild Cockatiel Sightings - Australia</title>
+  <style>
+    html, body, #map {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #title {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: Arial;
+      font-size: 16px;
+      font-weight: bold;
+      z-index: 999;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+  </style>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.29/"></script>
+</head>
+<body>
+  <div id="title"><img src="cockatiel.svg" style="height:24px; vertical-align:middle; margin-right:8px;">Wild Cockatiel Sightings — Australia</div>
+  <div id="map"></div>
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/Graphic",
+      "esri/layers/GraphicsLayer",
+      "esri/symbols/SimpleMarkerSymbol"
+    ], function(Map, MapView, Graphic, GraphicsLayer, SimpleMarkerSymbol) {
+
+      const map = new Map({ basemap: "streets" });
+      const view = new MapView({
+        container: "map",
+        map: map,
+        center: [134, -25],
+        zoom: 4
+      });
+
+      const layer = new GraphicsLayer();
+      map.add(layer);
+
+      const symbol = {
+        type: "picture-marker",
+        url: "cockatiel.svg",
+        width: "32px",
+        height: "32px"
+      };
+
+      // Fetch cockatiel sightings from GBIF API
+      fetch("https://api.gbif.org/v1/occurrence/search?speciesKey=2479977&country=AU&limit=300&hasCoordinate=true")
+        .then(response => response.json())
+        .then(data => {
+          data.results.forEach(sighting => {
+            if (sighting.decimalLongitude && sighting.decimalLatitude) {
+              const point = {
+                type: "point",
+                longitude: sighting.decimalLongitude,
+                latitude: sighting.decimalLatitude
+              };
+              const graphic = new Graphic({
+                geometry: point,
+                symbol: symbol,
+                attributes: {
+  date: sighting.eventDate || "Unknown",
+  location: sighting.locality || "Unknown",
+  recorder: sighting.recordedBy || "Unknown",
+  imageUrl: sighting.media && sighting.media[0] ? sighting.media[0].identifier : null
+},
+                popupTemplate: {
+  title: "<img src='http://127.0.0.1:5500/cockatiel.svg' style='height:20px; vertical-align:middle; margin-right:6px;'> Wild Cockatiel Sighting",
+  content: function(feature) {
+    const a = feature.graphic.attributes;
+    const img = a.imageUrl 
+      ? `<img src="${a.imageUrl}" style="width:100%; max-width:800px; margin-bottom:8px; border-radius:4px;"><br>` 
+      : "";
+    return `${img}📅 Date: ${a.date}<br>📍 Location: ${a.location}<br>👤 Recorded by: ${a.recorder}`;
+  }
+}
+              });
+              layer.add(graphic);
+            }
+          });
+        });
+    });
+  </script>
+</body>
+</html>
